@@ -1,0 +1,30 @@
+<resources>
+    <string name="app_name">SMS Webhook Forwarder</string>
+    <string name="app_subtitle">Receive incoming SMS on-device and forward each message to your n8n or custom webhook as JSON.</string>
+    <string name="webhook_section_title">Webhook Endpoint</string>
+    <string name="webhook_section_body">Save the HTTP or HTTPS endpoint that should receive each incoming SMS payload.</string>
+    <string name="webhook_hint">https://example.com/webhook</string>
+    <string name="save_webhook">Save Webhook URL</string>
+    <string name="webhook_saved">Webhook URL saved.</string>
+    <string name="webhook_missing">Webhook status: not configured yet.</string>
+    <string name="webhook_configured">Webhook status: %1$s</string>
+    <string name="invalid_webhook_url">Enter a valid http:// or https:// webhook URL.</string>
+    <string name="invalid_n8n_webhook_path">Use the exact n8n webhook URL, for example https://host/webhook/&lt;id&gt;.</string>
+    <string name="permission_section_title">Runtime Permission</string>
+    <string name="sms_permission_missing">RECEIVE_SMS is not granted yet. The app cannot capture incoming SMS until you allow it.</string>
+    <string name="sms_permission_granted">RECEIVE_SMS is granted. Incoming SMS broadcasts can now be captured.</string>
+    <string name="sms_permission_denied">SMS permission was denied, so forwarding is still disabled.</string>
+    <string name="sms_permission_already_granted">SMS permission is already granted.</string>
+    <string name="sms_permission_ready">RECEIVE_SMS Granted</string>
+    <string name="request_sms_permission">Grant RECEIVE_SMS</string>
+    <string name="internet_permission_note">INTERNET is declared in the manifest and granted automatically by Android. It does not have a runtime permission dialog.</string>
+    <string name="delivery_section_title">Background Delivery</string>
+    <string name="delivery_section_body">The broadcast receiver hands each SMS to WorkManager, which posts JSON with OkHttp in the background and retries automatically after network failures or retryable server errors.</string>
+    <string name="rcs_note">RCS is not exposed to third-party apps through the SMS_RECEIVED broadcast, so this project can forward SMS but not native RCS conversations.</string>
+    <string name="send_test_webhook">Send Test Webhook</string>
+    <string name="refresh_status">Refresh Delivery Status</string>
+    <string name="test_webhook_queued">Manual test webhook queued.</string>
+    <string name="delivery_logs_title">Built-in Delivery Logs</string>
+    <string name="clear_logs">Clear Logs</string>
+    <string name="logs_cleared">Delivery logs cleared.</string>
+</resources>

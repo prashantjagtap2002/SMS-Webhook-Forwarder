@@ -1,0 +1,9 @@
+<resources>
+    <color name="brandPrimary">#22433E</color>
+    <color name="brandSecondary">#D86A3F</color>
+    <color name="surfaceWarm">#F6F1E8</color>
+    <color name="cardSurface">#FFFCF6</color>
+    <color name="cardStroke">#D8CCBC</color>
+    <color name="ink">#1F1C18</color>
+    <color name="mutedInk">#665F57</color>
+</resources>
