@@ -14,6 +14,7 @@ class MainActivity : AppCompatActivity() {
     private lateinit var binding: ActivityMainBinding
     private lateinit var configStore: WebhookConfigStore
     private lateinit var deliveryStatusStore: DeliveryStatusStore
+    private lateinit var outboxStore: SmsOutboxStore
 
     private val smsPermissionLauncher = registerForActivityResult(
         ActivityResultContracts.RequestPermission()
@@ -39,6 +40,7 @@ class MainActivity : AppCompatActivity() {
 
         configStore = WebhookConfigStore(applicationContext)
         deliveryStatusStore = DeliveryStatusStore(applicationContext)
+        outboxStore = SmsOutboxStore(applicationContext)
         binding.webhookEditText.setText(configStore.getWebhookUrl())
 
         binding.saveWebhookButton.setOnClickListener { saveWebhookUrl() }
@@ -72,6 +74,12 @@ class MainActivity : AppCompatActivity() {
         binding.webhookEditText.setText(webhookUrl)
         configStore.saveWebhookUrl(webhookUrl)
         deliveryStatusStore.saveStatus("Webhook URL saved: $webhookUrl")
+        if (outboxStore.hasPending()) {
+            deliveryStatusStore.saveStatus(
+                "Webhook URL saved: $webhookUrl. Resuming ${outboxStore.count()} pending webhook deliver${if (outboxStore.count() == 1) "y" else "ies"}."
+            )
+            SmsWebhookWorker.enqueuePendingDrain(applicationContext)
+        }
         updateWebhookState()
         refreshDeliveryUi()
         showToast(getString(R.string.webhook_saved))
@@ -150,7 +158,11 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun refreshDeliveryUi() {
-        binding.deliveryStatusText.text = deliveryStatusStore.getLastStatus()
+        binding.deliveryStatusText.text = getString(
+            R.string.delivery_status_summary,
+            deliveryStatusStore.getLastStatus(),
+            outboxStore.count()
+        )
         binding.deliveryLogsText.text = deliveryStatusStore.getLogText()
     }
 

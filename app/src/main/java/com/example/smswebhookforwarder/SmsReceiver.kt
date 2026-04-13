@@ -29,16 +29,19 @@ class SmsReceiver : BroadcastReceiver() {
             return
         }
 
-        DeliveryStatusStore(context).saveStatus(
-            "Receiver captured SMS from $sender at ${receivedAtMillis.formatTimestamp()} and queued webhook delivery."
-        )
-
-        SmsWebhookWorker.enqueue(
-            context = context,
+        val outboxStore = SmsOutboxStore(context)
+        outboxStore.enqueue(
             sender = sender,
             message = messageBody,
-            receivedAtMillis = receivedAtMillis
+            receivedAtMillis = receivedAtMillis,
+            isManualTest = false
         )
+
+        DeliveryStatusStore(context).saveStatus(
+            "Receiver captured SMS from $sender at ${receivedAtMillis.formatTimestamp()} and queued webhook delivery. Pending outbox size: ${outboxStore.count()}."
+        )
+
+        SmsWebhookWorker.enqueuePendingDrain(context)
     }
 
     private fun Long.formatTimestamp(): String {
