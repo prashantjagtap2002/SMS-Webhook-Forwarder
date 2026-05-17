@@ -160,4 +160,11 @@
     <string name="home_configure_webhook">Configure</string>
     <string name="home_exempt_battery">Exempt</string>
     <string name="home_enable_notif">Enable</string>
+
+    <!-- Default SMS App (v2.0) -->
+    <string name="home_default_sms_label">Default SMS App</string>
+    <string name="home_default_sms_ok">Set as default — SMS delivers directly to this app</string>
+    <string name="home_default_sms_missing">Not default — tap Set Default so Android grants SMS access</string>
+    <string name="home_set_default_sms">Set Default</string>
+    <string name="sms_compose_unsupported">SMS Webhook Forwarder does not support sending messages.</string>
 </resources>

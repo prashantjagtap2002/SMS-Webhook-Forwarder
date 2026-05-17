@@ -10,7 +10,9 @@ import java.util.Locale
 
 class SmsReceiver : BroadcastReceiver() {
     override fun onReceive(context: Context, intent: Intent) {
-        if (intent.action != Telephony.Sms.Intents.SMS_RECEIVED_ACTION) {
+        val action = intent.action
+        if (action != Telephony.Sms.Intents.SMS_RECEIVED_ACTION &&
+            action != Telephony.Sms.Intents.SMS_DELIVER_ACTION) {
             return
         }
 

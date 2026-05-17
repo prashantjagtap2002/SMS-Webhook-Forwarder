@@ -3,6 +3,7 @@ name: Build & Distribute APK
 on:
   push:
     branches: [ main ]
+    tags: [ 'v*.*' ]
   pull_request:
     branches: [ main ]
 
@@ -45,8 +46,27 @@ jobs:
           path: app/build/outputs/apk/debug/app-debug.apk
           retention-days: 14
 
+      - name: Create GitHub Release
+        if: startsWith(github.ref, 'refs/tags/v')
+        uses: softprops/action-gh-release@v2
+        with:
+          files: app/build/outputs/apk/debug/app-debug.apk
+          name: SMS Webhook Forwarder ${{ github.ref_name }}
+          body: |
+            ## SMS Webhook Forwarder ${{ github.ref_name }}
+
+            ### What's new in v2.0
+            - App now qualifies as a **default SMS handler** — no more "App was denied access" error
+            - Set this app as your default SMS app to allow Android to grant RECEIVE_SMS
+            - Home tab now shows "Default SMS App" setup step
+            - Receives SMS via `SMS_DELIVER` (default app) and `SMS_RECEIVED` (fallback)
+
+            ### Install
+            Download `app-debug.apk` below and install it on your device.
+            Enable "Install from unknown sources" in Settings if prompted.
+
       - name: Distribute to Firebase App Distribution
-        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        if: github.event_name == 'push' && (github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/tags/v'))
         uses: wzieba/Firebase-Distribution-Github-Action@v1
         with:
           appId: ${{ secrets.FIREBASE_APP_ID }}
@@ -54,7 +74,7 @@ jobs:
           groups: testers
           file: app/build/outputs/apk/debug/app-debug.apk
           releaseNotes: |
-            Branch: ${{ github.ref_name }}
+            Branch/Tag: ${{ github.ref_name }}
             Commit: ${{ github.sha }}
             Run: #${{ github.run_number }}
             Message: ${{ github.event.head_commit.message }}

@@ -10,6 +10,7 @@ import android.os.Build
 import android.os.Bundle
 import android.os.PowerManager
 import android.provider.Settings
+import android.provider.Telephony
 import android.text.Editable
 import android.text.TextWatcher
 import android.view.View
@@ -59,6 +60,13 @@ class MainActivity : AppCompatActivity() {
         refreshDeliveryUi()
         refreshHomeTab()
         if (!granted) showToast(getString(R.string.sms_permission_denied))
+    }
+
+    private val defaultSmsLauncher = registerForActivityResult(
+        ActivityResultContracts.StartActivityForResult()
+    ) {
+        refreshDeliveryUi()
+        refreshHomeTab()
     }
 
     private val notifPermissionLauncher = registerForActivityResult(
@@ -140,6 +148,7 @@ class MainActivity : AppCompatActivity() {
 
         // Home tab buttons
         binding.homeGrantSmsButton.setOnClickListener { requestSmsPermission(force = true) }
+        binding.homeSetDefaultSmsButton.setOnClickListener { requestDefaultSmsApp() }
         binding.homeSendTestButton.setOnClickListener { sendTestWebhook() }
         binding.homeBatteryExemptButton.setOnClickListener { requestBatteryOptExemption() }
         binding.homeNotifEnableButton.setOnClickListener { requestNotifPermission() }
@@ -196,6 +205,8 @@ class MainActivity : AppCompatActivity() {
             this, Manifest.permission.RECEIVE_SMS
         ) == PackageManager.PERMISSION_GRANTED
 
+        val isDefaultSms = isDefaultSmsApp()
+
         val enabledProfiles = profileStore.getEnabledProfiles()
         val webhookConfigured = enabledProfiles.isNotEmpty()
 
@@ -208,7 +219,7 @@ class MainActivity : AppCompatActivity() {
             ) == PackageManager.PERMISSION_GRANTED
         } else true
 
-        val allGood = smsPerm && webhookConfigured
+        val allGood = smsPerm && webhookConfigured && isDefaultSms
         val statusColor = ContextCompat.getColor(
             this, if (allGood) R.color.statusGreen else R.color.statusAmber
         )
@@ -220,11 +231,17 @@ class MainActivity : AppCompatActivity() {
             if (allGood) R.string.home_status_ok_subtitle else R.string.home_status_warn_subtitle
         )
 
-        // SMS row
+        // SMS permission row
         binding.homeSetupSmsStatusText.text = getString(
             if (smsPerm) R.string.home_sms_granted else R.string.home_sms_missing
         )
         binding.homeGrantSmsButton.visibility = if (smsPerm) View.GONE else View.VISIBLE
+
+        // Default SMS app row
+        binding.homeDefaultSmsStatusText.text = getString(
+            if (isDefaultSms) R.string.home_default_sms_ok else R.string.home_default_sms_missing
+        )
+        binding.homeSetDefaultSmsButton.visibility = if (isDefaultSms) View.GONE else View.VISIBLE
 
         // Webhook row
         binding.homeWebhookStatusText.text = if (webhookConfigured) {
@@ -248,6 +265,16 @@ class MainActivity : AppCompatActivity() {
         // Test button and network status
         binding.homeSendTestButton.isEnabled = webhookConfigured && smsPerm
         binding.homeNetworkStatusText.text = getNetworkStatusText()
+    }
+
+    private fun isDefaultSmsApp(): Boolean =
+        Telephony.Sms.getDefaultSmsPackage(this) == packageName
+
+    private fun requestDefaultSmsApp() {
+        val intent = Intent(Telephony.Sms.Intents.ACTION_CHANGE_DEFAULT).apply {
+            putExtra(Telephony.Sms.Intents.EXTRA_PACKAGE_NAME, packageName)
+        }
+        defaultSmsLauncher.launch(intent)
     }
 
     // ── Profile management ──────────────────────────────────────────────────
