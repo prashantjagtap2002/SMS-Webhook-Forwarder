@@ -106,13 +106,17 @@
                 android:resource="@xml/delivery_pulse_widget_info" />
         </receiver>
 
-        <!-- Required to qualify as a default SMS app: respond-via-message service -->
+        <!-- Required to qualify as a default SMS app: respond-via-message service.
+             The action MUST be android.intent.action.RESPOND_VIA_MESSAGE (matches
+             TelephonyManager.ACTION_RESPOND_VIA_MESSAGE). Using the wrong namespace
+             (android.telephony.action.*) silently disqualifies the app from being a
+             default SMS handler — Android won't show it in the picker. -->
         <service
             android:name=".HeadlessSmsSendService"
             android:exported="true"
             android:permission="android.permission.SEND_RESPOND_VIA_MESSAGE">
             <intent-filter>
-                <action android:name="android.telephony.action.RESPOND_VIA_MESSAGE" />
+                <action android:name="android.intent.action.RESPOND_VIA_MESSAGE" />
                 <category android:name="android.intent.category.DEFAULT" />
                 <data android:scheme="sms" />
                 <data android:scheme="smsto" />

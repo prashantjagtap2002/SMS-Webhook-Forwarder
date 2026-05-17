@@ -1,6 +1,7 @@
 package com.example.smswebhookforwarder
 
 import android.Manifest
+import android.app.role.RoleManager
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.net.ConnectivityManager
@@ -267,14 +268,38 @@ class MainActivity : AppCompatActivity() {
         binding.homeNetworkStatusText.text = getNetworkStatusText()
     }
 
-    private fun isDefaultSmsApp(): Boolean =
-        Telephony.Sms.getDefaultSmsPackage(this) == packageName
+    private fun isDefaultSmsApp(): Boolean {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+            val roleManager = getSystemService(RoleManager::class.java)
+            if (roleManager != null && roleManager.isRoleAvailable(RoleManager.ROLE_SMS)) {
+                return roleManager.isRoleHeld(RoleManager.ROLE_SMS)
+            }
+        }
+        return Telephony.Sms.getDefaultSmsPackage(this) == packageName
+    }
 
     private fun requestDefaultSmsApp() {
-        val intent = Intent(Telephony.Sms.Intents.ACTION_CHANGE_DEFAULT).apply {
-            putExtra(Telephony.Sms.Intents.EXTRA_PACKAGE_NAME, packageName)
+        // Modern path: RoleManager.ROLE_SMS (Android 10+). This shows a proper system
+        // dialog "Allow [app] to access SMS messages?" and grants RECEIVE_SMS on accept.
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+            val roleManager = getSystemService(RoleManager::class.java)
+            if (roleManager != null && roleManager.isRoleAvailable(RoleManager.ROLE_SMS)) {
+                if (roleManager.isRoleHeld(RoleManager.ROLE_SMS)) {
+                    showToast(getString(R.string.sms_permission_already_granted))
+                    return
+                }
+                defaultSmsLauncher.launch(
+                    roleManager.createRequestRoleIntent(RoleManager.ROLE_SMS)
+                )
+                return
+            }
         }
-        defaultSmsLauncher.launch(intent)
+        // Pre-Android 10 fallback
+        defaultSmsLauncher.launch(
+            Intent(Telephony.Sms.Intents.ACTION_CHANGE_DEFAULT).apply {
+                putExtra(Telephony.Sms.Intents.EXTRA_PACKAGE_NAME, packageName)
+            }
+        )
     }
 
     // ── Profile management ──────────────────────────────────────────────────
