@@ -7,6 +7,25 @@
   "client": [
     {
       "client_info": {
+        "mobilesdk_app_id": "1:600014309222:android:2487027f2928cdc424eaa7",
+        "android_client_info": {
+          "package_name": "com.example.smswebhookforwarder"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBnzXv2oj1HKYJnaiJJMS5w5HfWZD_jfak"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    },
+    {
+      "client_info": {
         "mobilesdk_app_id": "1:600014309222:android:8cfe757b6f03c1f224eaa7",
         "android_client_info": {
           "package_name": "com.tapflow.app.debug"
