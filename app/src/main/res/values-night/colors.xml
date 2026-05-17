@@ -1,0 +1,23 @@
+<resources>
+    <!-- iOS Dark Mode System Colors -->
+    <color name="iosBackground">#000000</color>
+    <color name="iosCard">#1C1C1E</color>
+    <color name="iosPrimaryText">#FFFFFF</color>
+    <color name="iosSecondaryText">#8E8E93</color>
+    <color name="iosSeparator">#38383A</color>
+    <color name="iosBlue">#0A84FF</color>
+    <color name="iosInputFill">#2C2C2E</color>
+
+    <!-- Aliases for existing layout references -->
+    <color name="surfaceWarm">#000000</color>
+    <color name="cardSurface">#1C1C1E</color>
+    <color name="cardStroke">#38383A</color>
+    <color name="ink">#FFFFFF</color>
+    <color name="mutedInk">#8E8E93</color>
+    <color name="brandPrimary">#0A84FF</color>
+    <color name="brandSecondary">#0A84FF</color>
+
+    <!-- Status indicator colors (same in dark mode) -->
+    <color name="statusGreen">#30D158</color>
+    <color name="statusAmber">#FF9F0A</color>
+</resources>

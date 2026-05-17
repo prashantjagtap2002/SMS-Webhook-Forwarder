@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "600014309222",
+    "project_id": "tapflow-new",
+    "storage_bucket": "tapflow-new.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:600014309222:android:8cfe757b6f03c1f224eaa7",
+        "android_client_info": {
+          "package_name": "com.tapflow.app.debug"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBnzXv2oj1HKYJnaiJJMS5w5HfWZD_jfak"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
