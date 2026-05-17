@@ -486,6 +486,16 @@ class MainActivity : AppCompatActivity() {
             }
             return
         }
+        // On Android 10+, RECEIVE_SMS is a restricted permission. Sideloaded apps cannot
+        // be granted it via the normal runtime dialog — the system shows "App was denied
+        // access" instead. The only way to get it is by becoming the default SMS app,
+        // after which Android grants RECEIVE_SMS automatically.
+        if (!isDefaultSmsApp()) {
+            if (force) requestDefaultSmsApp()
+            return
+        }
+        // Already the default SMS app but permission still missing (rare): try the
+        // raw runtime request as a last resort.
         smsPermissionLauncher.launch(Manifest.permission.RECEIVE_SMS)
     }
 
