@@ -8,7 +8,7 @@
     <string name="webhook_saved">Webhook URL saved.</string>
     <string name="webhook_missing">Webhook status: not configured yet.</string>
     <string name="webhook_configured">Webhook status: %1$s</string>
-    <string name="invalid_webhook_url">Enter a valid http:// or https:// webhook URL.</string>
+    <string name="invalid_webhook_url">Enter a valid https:// webhook URL.</string>
     <string name="invalid_n8n_webhook_path">Use the exact n8n webhook URL, for example https://host/webhook/&lt;id&gt;.</string>
     <string name="permission_section_title">Runtime Permission</string>
     <string name="sms_permission_missing">RECEIVE_SMS is not granted yet. The app cannot capture incoming SMS until you allow it.</string>
@@ -27,5 +27,137 @@
     <string name="delivery_logs_title">Built-in Delivery Logs</string>
     <string name="clear_logs">Clear Logs</string>
     <string name="logs_cleared">Delivery logs cleared.</string>
-    <string name="delivery_status_summary">Last status: %1$s\nPending outbox: %2$d</string>
+    <string name="reset_stats">Reset Counts</string>
+    <string name="stats_reset">Delivery counts reset.</string>
+    <string name="widget_title">SMS Delivery</string>
+    <string name="widget_title_classic">SMS Delivery</string>
+    <string name="widget_title_pulse">Delivery Pulse</string>
+    <string name="widget_success_label">Success</string>
+    <string name="widget_error_label">Errors</string>
+    <string name="widget_pending_label">Pending</string>
+    <string name="widget_pending_badge">%1$d queued</string>
+    <string name="widget_last_status_label">Last Status</string>
+    <string name="widget_retry_button">Retry Now</string>
+    <string name="widget_description">Shows SMS webhook delivery totals and pending outbox count.</string>
+    <string name="widget_pulse_description">A bold delivery widget with live totals and a quick retry action.</string>
+
+    <!-- Webhook Profiles -->
+    <string name="profiles_section_title">Webhook Profiles</string>
+    <string name="profiles_section_body">Configure up to 3 webhook endpoints. Each enabled profile receives every forwarded SMS. Useful for routing to multiple services simultaneously.</string>
+    <string name="profile_name_hint">Profile name</string>
+    <string name="profile_url_hint">https://your-webhook-url</string>
+    <string name="profile_auth_header_hint">Authorization header value (e.g. Bearer token123)</string>
+    <string name="profile_hmac_secret_hint">HMAC signing secret (optional)</string>
+    <string name="save_all_profiles">Save All Profiles</string>
+    <string name="profiles_saved">Webhook profiles saved.</string>
+    <string name="profiles_status_none">No profiles configured yet.</string>
+    <string name="profiles_enabled_count">%1$d profile(s) active.</string>
+    <string name="profile_expand">▼</string>
+    <string name="profile_collapse">▲</string>
+    <string name="profile_enabled_label">Enable</string>
+
+    <!-- Battery Optimization -->
+    <string name="battery_section_title">Battery &amp; Notifications</string>
+    <string name="battery_section_body">Android may delay or kill background tasks to save battery. Exempting this app ensures SMS is forwarded promptly even when the screen is off.</string>
+    <string name="battery_opt_exempt">Exempt — app can run freely in background.</string>
+    <string name="battery_opt_restricted">Restricted — battery optimization is active. Tap below to exempt.</string>
+    <string name="battery_opt_button">Exempt from Battery Optimization</string>
+    <string name="notif_perm_granted">Notifications enabled — delivery failures will alert you.</string>
+    <string name="notif_perm_missing">Notifications disabled — failure alerts won\'t show.</string>
+    <string name="request_notif_permission">Enable Failure Notifications</string>
+
+    <!-- Sender Filter -->
+    <string name="filter_section_title">Sender Filter</string>
+    <string name="filter_section_body">Control which senders are forwarded. Matching is case-insensitive and checks if the sender contains the entry.</string>
+    <string name="filter_mode_all">Forward all senders</string>
+    <string name="filter_mode_allowlist">Allow only listed senders</string>
+    <string name="filter_mode_blocklist">Block listed senders</string>
+    <string name="filter_list_hint">Senders, comma-separated (e.g. BANK, +1234)</string>
+    <string name="save_filter">Save Filter</string>
+    <string name="filter_saved">Sender filter saved.</string>
+    <string name="filter_status_all">All senders are forwarded.</string>
+    <string name="filter_status_allowlist">Allowlist active: only matching senders forwarded.</string>
+    <string name="filter_status_blocklist">Blocklist active: matching senders blocked.</string>
+
+    <!-- Export Logs -->
+    <string name="export_logs">Export Logs</string>
+    <string name="export_success">Logs exported to: %1$s</string>
+    <string name="export_failed">Export failed: %1$s</string>
+
+    <!-- Regex Message Filter -->
+    <string name="message_regex_hint">Message regex (optional, e.g. OTP|code|\\d{6})</string>
+    <string name="message_regex_invalid">Invalid regex pattern — filter disabled.</string>
+    <string name="message_regex_active">Message regex active: only matching messages forwarded.</string>
+    <string name="message_regex_inactive">No message regex — all message bodies forwarded.</string>
+
+    <!-- Payload Config -->
+    <string name="payload_section_title">Payload Fields</string>
+    <string name="payload_section_body">Choose which fields are included in the JSON sent to your webhook. Sender and message are always present.</string>
+    <string name="payload_delivery_id_label">deliveryId — unique ID per delivery</string>
+    <string name="payload_received_at_label">receivedAt — ISO-8601 timestamp</string>
+    <string name="payload_received_at_millis_label">receivedAtMillis — epoch milliseconds</string>
+    <string name="payload_device_model_label">deviceModel — phone make/model</string>
+    <string name="payload_attempt_label">attempt — delivery attempt number</string>
+    <string name="save_payload_config">Save Payload Fields</string>
+    <string name="payload_config_saved">Payload field config saved.</string>
+
+    <!-- Stat card labels -->
+    <string name="stat_delivered">Delivered</string>
+    <string name="stat_failed">Failed</string>
+    <string name="stat_pending">Pending</string>
+    <string name="stat_rate_with_total">Success rate: %1$.1f%% of %2$d total</string>
+    <string name="stat_rate_no_data">No deliveries yet — send a test to verify your webhook.</string>
+    <string name="stat_last_status_label">Last event</string>
+
+    <!-- Log search -->
+    <string name="log_search_hint">Search logs…</string>
+
+    <!-- Network / Worker status -->
+    <string name="network_status">Network: %1$s  ·  %2$s</string>
+    <string name="network_wifi">Wi-Fi</string>
+    <string name="network_mobile">Mobile data</string>
+    <string name="network_none">No network</string>
+    <string name="network_other">Connected</string>
+    <string name="worker_idle">Delivery idle</string>
+    <string name="worker_pending">%1$d message(s) queued</string>
+
+    <!-- Bottom navigation tabs -->
+    <string name="nav_home">Home</string>
+    <string name="nav_settings">Settings</string>
+    <string name="nav_logs">Logs</string>
+
+    <!-- Tab titles -->
+    <string name="tab_settings_title">Settings</string>
+    <string name="tab_logs_title">Logs</string>
+
+    <!-- Home tab status banner -->
+    <string name="home_status_ok_title">Forwarding active</string>
+    <string name="home_status_ok_subtitle">Incoming SMS will be forwarded to your webhook.</string>
+    <string name="home_status_warn_title">Setup required</string>
+    <string name="home_status_warn_subtitle">Complete the checklist below to start forwarding.</string>
+
+    <!-- Home tab section headers -->
+    <string name="home_status_section_title">Status</string>
+    <string name="home_setup_section_title">Setup Checklist</string>
+    <string name="home_test_section_title">Test</string>
+
+    <!-- Home tab checklist labels -->
+    <string name="home_sms_label">SMS Permission</string>
+    <string name="home_sms_granted">Granted — ready to capture incoming SMS</string>
+    <string name="home_sms_missing">Not granted — tap Grant to allow</string>
+    <string name="home_webhook_label">Webhook URL</string>
+    <string name="home_webhook_ok">%1$d endpoint(s) active</string>
+    <string name="home_webhook_missing">Not configured — tap Configure to set up</string>
+    <string name="home_battery_label">Battery</string>
+    <string name="home_battery_ok">Unrestricted — app runs freely in background</string>
+    <string name="home_battery_warn">Restricted — may delay SMS forwarding</string>
+    <string name="home_notif_label">Notifications</string>
+    <string name="home_notif_ok">Enabled — failure alerts are on</string>
+    <string name="home_notif_missing">Disabled — you won\'t see failure alerts</string>
+
+    <!-- Home tab action buttons -->
+    <string name="home_grant_sms">Grant</string>
+    <string name="home_configure_webhook">Configure</string>
+    <string name="home_exempt_battery">Exempt</string>
+    <string name="home_enable_notif">Enable</string>
 </resources>

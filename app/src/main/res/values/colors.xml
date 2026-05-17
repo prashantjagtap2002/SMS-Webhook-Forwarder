@@ -1,9 +1,38 @@
 <resources>
-    <color name="brandPrimary">#22433E</color>
-    <color name="brandSecondary">#D86A3F</color>
-    <color name="surfaceWarm">#F6F1E8</color>
-    <color name="cardSurface">#FFFCF6</color>
-    <color name="cardStroke">#D8CCBC</color>
-    <color name="ink">#1F1C18</color>
-    <color name="mutedInk">#665F57</color>
+    <!-- iOS Light Mode System Colors -->
+    <color name="iosBackground">#F2F2F7</color>
+    <color name="iosCard">#FFFFFF</color>
+    <color name="iosPrimaryText">#000000</color>
+    <color name="iosSecondaryText">#8E8E93</color>
+    <color name="iosSeparator">#C6C6C8</color>
+    <color name="iosBlue">#007AFF</color>
+    <color name="iosInputFill">#E5E5EA</color>
+
+    <!-- Aliases for existing layout references -->
+    <color name="surfaceWarm">#F2F2F7</color>
+    <color name="cardSurface">#FFFFFF</color>
+    <color name="cardStroke">#C6C6C8</color>
+    <color name="ink">#000000</color>
+    <color name="mutedInk">#8E8E93</color>
+    <color name="brandPrimary">#007AFF</color>
+    <color name="brandSecondary">#007AFF</color>
+
+    <!-- Status indicator colors -->
+    <color name="statusGreen">#34C759</color>
+    <color name="statusAmber">#FF9500</color>
+    <color name="statusRed">#FF3B30</color>
+
+    <!-- Widget Colors (preserved) -->
+    <color name="widgetSuccess">#1F8B5F</color>
+    <color name="widgetError">#D86A3F</color>
+    <color name="widgetPending">#8A6A1F</color>
+    <color name="pulseSurface">#21242E</color>
+    <color name="pulseSurfaceDeep">#171922</color>
+    <color name="pulseStroke">#353A47</color>
+    <color name="pulseInk">#FFF7EC</color>
+    <color name="pulseMuted">#C7C0B3</color>
+    <color name="pulseAccent">#7BE3C4</color>
+    <color name="pulseChip">#2B3140</color>
+    <color name="pulseDanger">#FF8D7A</color>
+    <color name="pulseWarning">#FFD166</color>
 </resources>

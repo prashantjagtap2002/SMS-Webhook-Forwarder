@@ -21,6 +21,6 @@ class BootCompletedReceiver : BroadcastReceiver() {
         DeliveryStatusStore(context).saveStatus(
             "Resuming ${outboxStore.count()} pending webhook deliver${if (outboxStore.count() == 1) "y" else "ies"} after device/app restart."
         )
-        SmsWebhookWorker.enqueuePendingDrain(context)
+        SmsWebhookWorker.enqueuePendingDrain(context, replaceExisting = true)
     }
 }

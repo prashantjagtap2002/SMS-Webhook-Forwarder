@@ -1,24 +1,36 @@
 package com.example.smswebhookforwarder
 
 import android.content.Context
+import androidx.security.crypto.EncryptedSharedPreferences
+import androidx.security.crypto.MasterKeys
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 import java.util.UUID
 
 class SmsOutboxStore(context: Context) {
-    private val preferences = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
+    private val appContext = context.applicationContext
+    private val masterKeyAlias = MasterKeys.getOrCreate(MasterKeys.AES256_GCM_SPEC)
+    private val preferences = EncryptedSharedPreferences.create(
+        PREFS_NAME,
+        masterKeyAlias,
+        context,
+        EncryptedSharedPreferences.PrefKeyEncryptionScheme.AES256_SIV,
+        EncryptedSharedPreferences.PrefValueEncryptionScheme.AES256_GCM
+    )
     private val gson = Gson()
+
+    // Fix #2: all read-modify-write methods use a class-level lock shared across all instances,
+    // preventing SmsReceiver (main thread) and SmsWebhookWorker (worker thread) from
+    // corrupting the outbox with concurrent reads and writes.
 
     fun enqueue(
         sender: String,
         message: String,
         receivedAtMillis: Long,
         isManualTest: Boolean
-    ): PendingWebhookDelivery {
+    ): PendingWebhookDelivery = synchronized(lock) {
         val existing = findExisting(sender, message, receivedAtMillis, isManualTest)
-        if (existing != null) {
-            return existing
-        }
+        if (existing != null) return@synchronized existing
 
         val newEntry = PendingWebhookDelivery(
             id = UUID.randomUUID().toString(),
@@ -28,16 +40,21 @@ class SmsOutboxStore(context: Context) {
             isManualTest = isManualTest,
             createdAtMillis = System.currentTimeMillis()
         )
-
         val updated = readAll().toMutableList()
         updated.add(newEntry)
         writeAll(updated)
-        return newEntry
+        newEntry
     }
 
-    fun peek(): PendingWebhookDelivery? = readAll().minByOrNull { it.createdAtMillis }
+    fun peekAll(): List<PendingWebhookDelivery> = synchronized(lock) {
+        readAll().sortedBy { it.createdAtMillis }
+    }
 
-    fun markAttemptStarted(id: String): PendingWebhookDelivery? {
+    fun peek(): PendingWebhookDelivery? = synchronized(lock) {
+        readAll().minByOrNull { it.createdAtMillis }
+    }
+
+    fun markAttemptStarted(id: String): PendingWebhookDelivery? = synchronized(lock) {
         val updated = readAll().map { entry ->
             if (entry.id == id) {
                 entry.copy(
@@ -49,31 +66,35 @@ class SmsOutboxStore(context: Context) {
                 entry
             }
         }
-
         writeAll(updated)
-        return updated.firstOrNull { it.id == id }
+        updated.firstOrNull { it.id == id }
     }
 
-    fun markAttemptFailed(id: String, error: String) {
+    fun markDeliveredToProfile(id: String, profileId: String) = synchronized(lock) {
         val updated = readAll().map { entry ->
-            if (entry.id == id) {
-                entry.copy(lastError = error)
-            } else {
-                entry
-            }
+            if (entry.id == id) entry.copy(deliveredProfileIds = entry.deliveredProfileIds + profileId)
+            else entry
         }
-
         writeAll(updated)
     }
 
-    fun remove(id: String) {
+    fun markAttemptFailed(id: String, error: String) = synchronized(lock) {
+        val updated = readAll().map { entry ->
+            if (entry.id == id) entry.copy(lastError = error)
+            else entry
+        }
+        writeAll(updated)
+    }
+
+    fun remove(id: String) = synchronized(lock) {
         writeAll(readAll().filterNot { it.id == id })
     }
 
-    fun count(): Int = readAll().size
+    fun count(): Int = synchronized(lock) { readAll().size }
 
     fun hasPending(): Boolean = count() > 0
 
+    // Private helpers — always called from within a synchronized(lock) block.
     private fun findExisting(
         sender: String,
         message: String,
@@ -90,10 +111,7 @@ class SmsOutboxStore(context: Context) {
 
     private fun readAll(): List<PendingWebhookDelivery> {
         val raw = preferences.getString(KEY_OUTBOX, null).orEmpty()
-        if (raw.isBlank()) {
-            return emptyList()
-        }
-
+        if (raw.isBlank()) return emptyList()
         return runCatching {
             gson.fromJson<List<PendingWebhookDelivery>>(raw, pendingListType)
         }.getOrDefault(emptyList())
@@ -103,6 +121,7 @@ class SmsOutboxStore(context: Context) {
         preferences.edit()
             .putString(KEY_OUTBOX, gson.toJson(items))
             .apply()
+        DeliveryWidgetUpdater.updateAll(appContext)
     }
 
     data class PendingWebhookDelivery(
@@ -114,11 +133,13 @@ class SmsOutboxStore(context: Context) {
         val createdAtMillis: Long,
         val attemptCount: Int = 0,
         val lastAttemptAtMillis: Long? = null,
-        val lastError: String? = null
+        val lastError: String? = null,
+        val deliveredProfileIds: Set<String> = emptySet()
     )
 
     companion object {
-        private const val PREFS_NAME = "sms_webhook_outbox"
+        private val lock = Any()
+        private const val PREFS_NAME = "sms_webhook_outbox_secure"
         private const val KEY_OUTBOX = "pending_deliveries"
         private val pendingListType =
             object : TypeToken<List<PendingWebhookDelivery>>() {}.type
