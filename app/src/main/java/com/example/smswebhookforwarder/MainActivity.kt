@@ -22,6 +22,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
+import androidx.lifecycle.lifecycleScope
 import com.example.smswebhookforwarder.databinding.ActivityMainBinding
 import com.google.android.material.materialswitch.MaterialSwitch
 import com.google.android.material.textfield.TextInputEditText
@@ -30,6 +31,9 @@ import java.io.File
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 class MainActivity : AppCompatActivity() {
     private lateinit var binding: ActivityMainBinding
@@ -38,6 +42,13 @@ class MainActivity : AppCompatActivity() {
     private lateinit var profileStore: WebhookProfileStore
     private lateinit var filterStore: SenderFilterStore
     private lateinit var payloadConfigStore: PayloadConfigStore
+    private lateinit var buildStore: BuildStore
+    private val githubClient = GitHubClient(
+        owner = "prashantjagtap2002",
+        repo = "SMS-Webhook-Forwarder",
+        workflowFile = "build.yml"
+    )
+    private val actionsUrl = "https://github.com/prashantjagtap2002/SMS-Webhook-Forwarder/actions"
 
     private data class ProfileViews(
         val content: LinearLayout,
@@ -87,6 +98,7 @@ class MainActivity : AppCompatActivity() {
         profileStore = WebhookProfileStore(applicationContext)
         filterStore = SenderFilterStore(applicationContext)
         payloadConfigStore = PayloadConfigStore(applicationContext)
+        buildStore = BuildStore(applicationContext)
 
         DeliveryNotificationHelper.createChannel(applicationContext)
         migrateLegacyConfig()
@@ -157,6 +169,13 @@ class MainActivity : AppCompatActivity() {
             binding.bottomNav.selectedItemId = R.id.navSettings
         }
 
+        // Build & Updates section
+        binding.homeBuildPatEdit.setText(buildStore.getPat())
+        binding.homeBuildSavePatButton.setOnClickListener { saveGithubPat() }
+        binding.homeBuildPushButton.setOnClickListener { triggerBuild() }
+        binding.homeBuildRefreshButton.setOnClickListener { refreshBuildStatus() }
+        binding.homeBuildOpenActionsButton.setOnClickListener { openActionsInBrowser() }
+
         binding.logSearchEdit.addTextChangedListener(object : TextWatcher {
             override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) = Unit
             override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) = Unit
@@ -180,6 +199,7 @@ class MainActivity : AppCompatActivity() {
         updateProfilesStatusText()
         refreshDeliveryUi()
         refreshHomeTab()
+        refreshBuildStatus()
         requestSmsPermission(force = false)
     }
 
@@ -647,5 +667,107 @@ class MainActivity : AppCompatActivity() {
 
     private fun showToast(message: String) {
         Toast.makeText(this, message, Toast.LENGTH_SHORT).show()
+    }
+
+    // ── Build & Updates ────────────────────────────────────────────────────
+
+    private fun saveGithubPat() {
+        val pat = binding.homeBuildPatEdit.text?.toString().orEmpty().trim()
+        buildStore.savePat(pat)
+        showToast(getString(R.string.home_build_pat_saved))
+        refreshBuildStatus()
+    }
+
+    private fun openActionsInBrowser() {
+        startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(actionsUrl)))
+    }
+
+    private fun triggerBuild() {
+        val pat = buildStore.getPat()
+        if (pat.isBlank()) {
+            showToast(getString(R.string.home_build_pat_missing))
+            return
+        }
+        binding.homeBuildPushButton.isEnabled = false
+        lifecycleScope.launch {
+            val result = withContext(Dispatchers.IO) { githubClient.triggerWorkflow(pat) }
+            when (result) {
+                is GitHubClient.Result.Ok -> {
+                    showToast(getString(R.string.home_build_push_triggered))
+                    // GitHub takes a few seconds to register the new run
+                    kotlinx.coroutines.delay(3000)
+                    refreshBuildStatus()
+                }
+                is GitHubClient.Result.Err -> {
+                    showToast(getString(R.string.home_build_push_failed, result.message))
+                }
+            }
+            binding.homeBuildPushButton.isEnabled = true
+        }
+    }
+
+    private fun refreshBuildStatus() {
+        binding.homeBuildInstalledText.text = getString(
+            R.string.home_build_installed_label
+        ) + " " + BuildConfig.VERSION_NAME
+        binding.homeBuildLatestText.text = getString(R.string.home_build_latest_label) + " " +
+            getString(R.string.home_build_loading)
+        binding.homeBuildLastRunText.text = getString(R.string.home_build_last_run_label) + " " +
+            getString(R.string.home_build_loading)
+        binding.homeBuildPushButton.isEnabled = buildStore.hasPat()
+
+        lifecycleScope.launch {
+            val pat = buildStore.getPat().ifBlank { null }
+            val releaseResult = withContext(Dispatchers.IO) { githubClient.getLatestRelease() }
+            val runResult = withContext(Dispatchers.IO) { githubClient.getLatestRun(pat) }
+
+            // Latest release line
+            binding.homeBuildLatestText.text = when (releaseResult) {
+                is GitHubClient.Result.Ok -> {
+                    val release = releaseResult.value
+                    if (release == null) {
+                        getString(R.string.home_build_latest_label) + " —"
+                    } else {
+                        val installed = "v${BuildConfig.VERSION_NAME}"
+                        val marker = if (release.tagName == installed) {
+                            getString(R.string.home_build_up_to_date)
+                        } else {
+                            getString(R.string.home_build_update_available)
+                        }
+                        "${getString(R.string.home_build_latest_label)} ${release.tagName}  $marker"
+                    }
+                }
+                is GitHubClient.Result.Err -> {
+                    "${getString(R.string.home_build_latest_label)} ${getString(R.string.home_build_status_error, releaseResult.message)}"
+                }
+            }
+
+            // Last run line
+            binding.homeBuildLastRunText.text = when (runResult) {
+                is GitHubClient.Result.Ok -> {
+                    val run = runResult.value
+                    if (run == null) {
+                        "${getString(R.string.home_build_last_run_label)} ${getString(R.string.home_build_status_no_runs)}"
+                    } else {
+                        val title = run.displayTitle.ifBlank { run.headBranch }
+                        val statusLine = when (run.status) {
+                            "completed" -> when (run.conclusion) {
+                                "success" -> getString(R.string.home_build_status_success, title)
+                                "failure" -> getString(R.string.home_build_status_failed, title, run.htmlUrl)
+                                "cancelled" -> getString(R.string.home_build_status_cancelled, title)
+                                else -> "${run.conclusion ?: "?"} · $title"
+                            }
+                            "in_progress" -> getString(R.string.home_build_status_running, title)
+                            "queued" -> getString(R.string.home_build_status_queued, title)
+                            else -> "${run.status} · $title"
+                        }
+                        "${getString(R.string.home_build_last_run_label)} $statusLine"
+                    }
+                }
+                is GitHubClient.Result.Err -> {
+                    "${getString(R.string.home_build_last_run_label)} ${getString(R.string.home_build_status_error, runResult.message)}"
+                }
+            }
+        }
     }
 }

@@ -161,6 +161,33 @@
     <string name="home_exempt_battery">Exempt</string>
     <string name="home_enable_notif">Enable</string>
 
+    <!-- Build & Updates section (v2.3) -->
+    <string name="home_build_section_title">Build &amp; Updates</string>
+    <string name="home_build_section_body">Trigger a new CI/CD build from inside the app. Builds are distributed via Firebase App Distribution to the testers group.</string>
+    <string name="home_build_installed_label">Installed version:</string>
+    <string name="home_build_latest_label">Latest GitHub release:</string>
+    <string name="home_build_last_run_label">Last build run:</string>
+    <string name="home_build_pat_hint">GitHub Personal Access Token (workflow scope)</string>
+    <string name="home_build_save_pat">Save PAT</string>
+    <string name="home_build_pat_saved">PAT saved.</string>
+    <string name="home_build_pat_missing">Add a GitHub PAT below to enable Push.</string>
+    <string name="home_build_pat_help">Generate at github.com/settings/tokens (Fine-grained or classic) with Actions: read &amp; write.</string>
+    <string name="home_build_push_button">Push (Trigger Build)</string>
+    <string name="home_build_refresh_button">Refresh</string>
+    <string name="home_build_open_actions">Open Actions</string>
+    <string name="home_build_loading">Loading…</string>
+    <string name="home_build_push_triggered">Build triggered. Watch status below.</string>
+    <string name="home_build_push_failed">Could not trigger build: %1$s</string>
+    <string name="home_build_status_running">in progress · %1$s</string>
+    <string name="home_build_status_success">success · %1$s</string>
+    <string name="home_build_status_failed">FAILED · %1$s (%2$s)</string>
+    <string name="home_build_status_cancelled">cancelled · %1$s</string>
+    <string name="home_build_status_queued">queued · %1$s</string>
+    <string name="home_build_status_error">error: %1$s</string>
+    <string name="home_build_status_no_runs">no runs yet</string>
+    <string name="home_build_update_available">⬇ update available</string>
+    <string name="home_build_up_to_date">✓ up to date</string>
+
     <!-- Default SMS App (v2.0) -->
     <string name="home_default_sms_label">Default SMS App</string>
     <string name="home_default_sms_ok">Set as default — SMS delivers directly to this app</string>
